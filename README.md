@@ -2,6 +2,17 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Deploy to Vercel
+
+1. Install and login:
+   `npm i -g vercel && vercel login`
+2. From this folder, deploy:
+   `vercel --prod`
+3. In Vercel project settings, set environment variable:
+   `VITE_API_BASE_URL=<your-backend-url>`
+
+`vercel.json` is included to rewrite all routes to `index.html`, so React Router deep links work.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
