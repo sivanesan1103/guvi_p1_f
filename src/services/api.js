@@ -1,7 +1,13 @@
 import axios from 'axios'
 import { toUserMessage } from '../utils/errorMessage'
+import { normalizeBaseUrl } from '../utils/baseUrl'
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://guviproject1lms-production.up.railway.app'
+export const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL)
+
+const getCurrentClientPath = () => {
+  const hashPath = window.location.hash?.replace(/^#/, '')
+  return hashPath || window.location.pathname
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,7 +29,7 @@ api.interceptors.response.use(
     const enhancedError = new Error(message)
     enhancedError.status = status
     enhancedError.raw = error
-    if (enhancedError.status === 401 && window.location.pathname !== '/login') {
+    if (enhancedError.status === 401 && getCurrentClientPath() !== '/login') {
       localStorage.removeItem('lms_token')
       localStorage.removeItem('lms_role')
     }
@@ -58,7 +64,7 @@ export const lmsApi = {
   uploadFile: async (file) => {
     const formData = new FormData()
     formData.append('file', file)
-    return (await api.post('/instructor/upload', formData)).data
+    return (await api.post('/api/upload', formData)).data
   },
 
   enrollCourse: async (courseId) => (await api.post(`/enroll/${courseId}`)).data,

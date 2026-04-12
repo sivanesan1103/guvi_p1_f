@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import CourseListPage from './pages/public/CourseListPage'
@@ -21,7 +21,7 @@ function DashboardRedirect() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/courses" replace />} />
         <Route path="/login" element={<LoginPage />} />
@@ -79,6 +79,6 @@ export default function App() {
         />
         <Route path="*" element={<Navigate to="/courses" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }

@@ -13,6 +13,8 @@ This template provides a minimal setup to get React working in Vite with HMR and
 
 `vercel.json` is included to rewrite all routes to `index.html`, so React Router deep links work.
 
+The app now uses hash-based routing, so routes also work even when host rewrite settings are missing. Example login URL: `/#/login`.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
