@@ -45,6 +45,7 @@ const toLessonPayload = (payload) => {
     videoUrl: payload.videoUrl ?? null,
     pdfUrl: payload.pdfUrl ?? null,
     imageUrl: payload.imageUrl ?? null,
+    contentUrl: payload.contentUrl ?? '',
   }
 }
 
