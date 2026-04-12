@@ -5,7 +5,9 @@ export default function LessonViewer({ lesson }) {
     return <div className="rounded-xl border border-slate-200 bg-white p-6">Select a lesson to start learning.</div>
   }
 
-  const mediaUrl = resolveAssetUrl(lesson.contentUrl)
+  const mediaUrl = resolveAssetUrl(
+    lesson.contentUrl ?? lesson.videoUrl ?? lesson.pdfUrl ?? lesson.imageUrl,
+  )
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-soft">

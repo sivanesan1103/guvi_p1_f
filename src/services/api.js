@@ -13,6 +13,41 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 })
 
+const normalizeLesson = (lesson) => {
+  const contentUrl = lesson?.contentUrl
+    ?? (lesson?.type === 'VIDEO'
+      ? lesson?.videoUrl
+      : lesson?.type === 'PDF'
+        ? lesson?.pdfUrl
+        : lesson?.imageUrl)
+    ?? ''
+
+  return { ...lesson, contentUrl }
+}
+
+const toLessonPayload = (payload) => {
+  const contentUrl = payload?.contentUrl?.trim?.() ?? ''
+  if (contentUrl) {
+    return {
+      title: payload.title,
+      description: payload.description,
+      type: payload.type,
+      videoUrl: payload.type === 'VIDEO' ? contentUrl : null,
+      pdfUrl: payload.type === 'PDF' ? contentUrl : null,
+      imageUrl: payload.type === 'IMAGE' ? contentUrl : null,
+    }
+  }
+
+  return {
+    title: payload.title,
+    description: payload.description,
+    type: payload.type,
+    videoUrl: payload.videoUrl ?? null,
+    pdfUrl: payload.pdfUrl ?? null,
+    imageUrl: payload.imageUrl ?? null,
+  }
+}
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('lms_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
@@ -44,7 +79,9 @@ export const lmsApi = {
   getCourseById: async (id) => (await api.get(`/courses/${id}`)).data,
   getApprovedCourses: async () => (await api.get('/courses/approved')).data,
   getApprovedCoursesWithFilters: async (params) => (await api.get('/courses/approved', { params })).data,
-  getLessonsByCourse: async (courseId) => (await api.get(`/courses/${courseId}/lessons`)).data,
+  getLessonsByCourse: async (courseId) => (
+    await api.get(`/courses/${courseId}/lessons`)
+  ).data.map(normalizeLesson),
 
   getUsers: async () => (await api.get('/admin/users')).data,
   getAdminCourses: async () => (await api.get('/admin/courses')).data,
@@ -57,8 +94,12 @@ export const lmsApi = {
   createCourse: async (payload) => (await api.post('/instructor/courses', payload)).data,
   getInstructorCourses: async () => (await api.get('/instructor/courses')).data,
   updateInstructorCourse: async (id, payload) => (await api.put(`/instructor/courses/${id}`, payload)).data,
-  createLesson: async (courseId, payload) => (await api.post(`/instructor/lessons/${courseId}`, payload)).data,
-  updateLesson: async (lessonId, payload) => (await api.put(`/instructor/lessons/${lessonId}`, payload)).data,
+  createLesson: async (courseId, payload) => normalizeLesson(
+    (await api.post(`/instructor/lessons/${courseId}`, toLessonPayload(payload))).data,
+  ),
+  updateLesson: async (lessonId, payload) => normalizeLesson(
+    (await api.put(`/instructor/lessons/${lessonId}`, toLessonPayload(payload))).data,
+  ),
   deleteLesson: async (lessonId) => (await api.delete(`/instructor/lessons/${lessonId}`)).data,
   getEnrolledStudentsForCourse: async (courseId) => (await api.get(`/instructor/courses/${courseId}/students`)).data,
   uploadFile: async (file) => {
