@@ -4,6 +4,7 @@ import DashboardLayout from '../../layouts/DashboardLayout'
 import DashboardCard from '../../components/DashboardCard'
 import LoadingState from '../../components/LoadingState'
 import ErrorState from '../../components/ErrorState'
+import LessonViewer from '../../components/LessonViewer'
 import { lmsApi } from '../../services/api'
 
 export default function AdminDashboardPage() {
@@ -13,6 +14,10 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [userError, setUserError] = useState('')
   const [courseError, setCourseError] = useState('')
+  const [viewCourse, setViewCourse] = useState(null)
+  const [viewLessons, setViewLessons] = useState([])
+  const [viewLoading, setViewLoading] = useState(false)
+  const [activeLesson, setActiveLesson] = useState(null)
 
   const loadAll = async () => {
     setLoading(true)
@@ -72,6 +77,29 @@ export default function AdminDashboardPage() {
     }
   }
 
+  const viewCourseDetails = async (courseId) => {
+    setViewLoading(true)
+    try {
+      const [courseData, lessonsData] = await Promise.all([
+        lmsApi.getCourseById(courseId),
+        lmsApi.getLessonsByCourse(courseId),
+      ])
+      setViewCourse(courseData)
+      setViewLessons(lessonsData)
+      setActiveLesson(lessonsData[0] ?? null)
+    } catch {
+      setCourseError('Failed to load course details')
+    } finally {
+      setViewLoading(false)
+    }
+  }
+
+  const closeView = () => {
+    setViewCourse(null)
+    setViewLessons([])
+    setActiveLesson(null)
+  }
+
   return (
     <DashboardLayout role="ADMIN" title="Admin Dashboard">
       <div className="grid gap-4 md:grid-cols-3">
@@ -92,7 +120,8 @@ export default function AdminDashboardPage() {
                   <th className="border border-slate-200 p-2 text-left">Name</th>
                   <th className="border border-slate-200 p-2 text-left">Email</th>
                   <th className="border border-slate-200 p-2 text-left">Role</th>
-                  <th className="border border-slate-200 p-2 text-left">Actions</th>
+<th className="border border-slate-200 p-2 text-left">Actions</th>
+                  <th className="border border-slate-200 p-2 text-left">Content</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,6 +172,7 @@ export default function AdminDashboardPage() {
                 <th className="border border-slate-200 p-2 text-left">Instructor</th>
                 <th className="border border-slate-200 p-2 text-left">Status</th>
                 <th className="border border-slate-200 p-2 text-left">Actions</th>
+                <th className="border border-slate-200 p-2 text-left">Content</th>
               </tr>
             </thead>
             <tbody>
@@ -168,12 +198,63 @@ export default function AdminDashboardPage() {
                       </button>
                     </div>
                   </td>
+                  <td className="border border-slate-200 p-2">
+                    <button
+                      onClick={() => viewCourseDetails(course.id)}
+                      className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      View
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </section>
+
+      {viewCourse ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-5xl overflow-auto rounded-xl bg-white p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold">{viewCourse.title}</h2>
+              <button onClick={closeView} className="rounded-lg border border-slate-300 px-3 py-1 text-sm font-semibold">
+                Close
+              </button>
+            </div>
+            <p className="mb-4 text-sm text-slate-600">{viewCourse.description}</p>
+            {viewLoading ? (
+              <LoadingState text="Loading content..." />
+            ) : (
+              <div className="grid gap-6 lg:grid-cols-[250px_1fr]">
+                <div className="rounded-lg border border-slate-200 p-3">
+                  <h3 className="mb-2 font-semibold">Lessons</h3>
+                  <div className="space-y-2">
+                    {viewLessons.length === 0 ? (
+                      <p className="text-sm text-slate-500">No lessons yet.</p>
+                    ) : (
+                      viewLessons.map((lesson) => (
+                        <button
+                          key={lesson.id}
+                          onClick={() => setActiveLesson(lesson)}
+                          className={`w-full rounded border px-2 py-1.5 text-left text-xs ${
+                            activeLesson?.id === lesson.id
+                              ? 'border-primary bg-violet-50 text-primary'
+                              : 'border-slate-200'
+                          }`}
+                        >
+                          {lesson.title}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+                <LessonViewer lesson={activeLesson} />
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
     </DashboardLayout>
   )
 }

@@ -30,7 +30,10 @@ export default function LessonViewer({ lesson }) {
       ) : null}
 
       {lesson.type === 'PDF' ? (
-        <iframe title={lesson.title} src={mediaUrl} className="h-[550px] w-full rounded-lg border border-slate-200" />
+        <div>
+          <iframe title={lesson.title} src={mediaUrl} className="h-[550px] w-full rounded-lg border border-slate-200" />
+          <p className="mt-2 text-xs text-slate-500">If the PDF doesn't load, <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">open in new tab</a>.</p>
+        </div>
       ) : null}
 
       {lesson.type === 'IMAGE' ? (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../../layouts/Navbar'
 import { lmsApi } from '../../services/api'
 import LessonViewer from '../../components/LessonViewer'
@@ -8,6 +8,7 @@ import ErrorState from '../../components/ErrorState'
 import { useAuth } from '../../context/AuthContext'
 
 export default function CourseDetailsPage() {
+  const navigate = useNavigate()
   const { courseId } = useParams()
   const { role, isAuthenticated } = useAuth()
   const [course, setCourse] = useState(null)
@@ -101,6 +102,12 @@ export default function CourseDetailsPage() {
     <div className="min-h-screen bg-slate-50">
       <Navbar />
       <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-6">
+        <button
+          onClick={() => navigate('/courses')}
+          className="mb-4 flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          ← Back to Courses
+        </button>
         {loading ? <LoadingState text="Loading course details..." /> : null}
         {error ? <ErrorState message={error} /> : null}
         {!loading && !error && course ? (
